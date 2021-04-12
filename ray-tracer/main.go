@@ -5,6 +5,8 @@ import (
 	"image"
 	"image/color"
 	"image/png"
+	"math"
+	"math/rand"
 	"os"
 )
 
@@ -23,21 +25,16 @@ func main() {
 
 	// Camera Settings
 
-	vh := 2.0
-	vw := aspectRatio * vh
-	focalLength := -1.0
 
-	origin := Vector{0,0,0}
-	horizontal := Vector{vw,0,0}
-	vertical := Vector{0,vh,0}
-	// origin - horizontal/2 - vertical/2 - focalLength
-	lowerLeft := origin.Subtract(horizontal.Divide(2)).Subtract(vertical.Divide(2)).Add(Vector{0,0, focalLength})
-
+	samples := 100
+	depth := 50
+	cam := makeCamera(2.0,1.0)
 
 	sphere := Sphere{Center: Vector{0,0,-1}, Radius: 0.5}
 	floor := Sphere{Center: Vector{0,-100.5,-1},Radius: 100}
 
 	list := List{[]Hittable{sphere,floor}}
+
 	f, _ := os.Create("out.ppm")
 	fmt.Fprintf(f, "P3\n%d %d\n255\n", imgWidth, imgHeight)
 
@@ -45,17 +42,20 @@ func main() {
 		fmt.Println(i)
 		for j := 0 ; j < imgWidth; j++ {
 
+			pxColor := Vector{}
+			for s := 0; s < samples; s++ {
+				u := (float64(j)+rand.Float64())/ float64(imgWidth)
+				v := (float64(i)+rand.Float64())/ float64(imgHeight)
+				r := cam.getRay(u,v)
+				pxColor = pxColor.Add(r.Color(list,depth))
+			}
 
-			u := float64(j)/ float64(imgWidth-1)
-			v := float64(i)/ float64(imgHeight-1)
+			writeColor(i,j,pxColor, img, samples)
 
-
-			r := Ray{origin,lowerLeft.Add(horizontal.Multiply(u)).Add(vertical.Multiply(v)).Subtract(origin)}
-			pxColor := r.Color(list)
-
-			writeColor(i,j,pxColor, img)
-
-			fmt.Fprintf(f, "%d %d %d\n", int(pxColor.X*255.99),  int(pxColor.Y*255.99),  int(pxColor.Z*255.99))
+			r := math.Sqrt(pxColor.X/100)
+			g := math.Sqrt(pxColor.Y/100)
+			b := math.Sqrt(pxColor.Z/100)
+			fmt.Fprintf(f, "%d %d %d\n", int(clamp(r,0.0,0.999) * 256), int(clamp(g,0.0,0.999) * 256),int(clamp(b,0.0,0.999) * 256))
 
 		}
 	}
@@ -67,12 +67,21 @@ func main() {
 
 
 
-func writeColor(i,j int , colorVector Vector, img *image.RGBA ) {
+func writeColor(i,j int , colorVector Vector, img *image.RGBA, samples int ) {
+	r := math.Sqrt( colorVector.X * (1.0/ float64(samples)))
+	g := math.Sqrt( colorVector.Y * (1.0/ float64(samples)))
+	b := math.Sqrt( colorVector.Z * (1.0/ float64(samples)))
 	img.Set(j,i,
 		color.RGBA{
-		R: uint8(colorVector.X * 255.999),
-		G: uint8(colorVector.Y * 255.999),
-		B: uint8(colorVector.Z * 255.999),
+		R: uint8(clamp(r,0.0,0.999) * 256),
+		G: uint8(clamp(g,0.0,0.999) * 256),
+		B: uint8(clamp(b,0.0,0.999) * 256),
 		A: 255,
 		})
+}
+
+func clamp(x, min, max float64) float64 {
+	if x < min {return min}
+	if x > max {return max}
+	return x
 }

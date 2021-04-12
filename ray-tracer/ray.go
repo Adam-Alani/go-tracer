@@ -13,11 +13,16 @@ func (r Ray) At(k float64) Vector {
 }
 
 
-func (r Ray) Color(h Hittable) Vector {
+func (r Ray) Color(h Hittable, depth int) Vector {
 
-	contact, rec := h.Hit(r,0,math.MaxFloat64)
+	contact, rec := h.Hit(r,0.001,math.Inf(1))
+
 	if contact {
-		return rec.Normal.AddScalar(1.0).Multiply(0.5)
+		if depth > 0 {
+
+			target := rec.P.Add(randomHemisphere(rec.Normal))
+			return Ray{rec.P, target.Subtract(rec.P)}.Color(h, depth-1).Multiply(0.5)
+		}
 	}
 
 	t := 0.5 * (r.Direction.Y + 1.0)

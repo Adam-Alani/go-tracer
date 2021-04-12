@@ -5,6 +5,8 @@ import "math"
 type Sphere struct {
 	Center Vector
 	Radius float64
+
+
 }
 
 func (s Sphere) Hit(r Ray, tMin, tMax float64) (bool,HitRecord) {
