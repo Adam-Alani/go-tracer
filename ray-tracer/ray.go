@@ -19,10 +19,14 @@ func (r Ray) Color(h Hittable, depth int) Vector {
 
 	if contact {
 		if depth > 0 {
-
-			target := rec.P.Add(randomHemisphere(rec.Normal))
-			return Ray{rec.P, target.Subtract(rec.P)}.Color(h, depth-1).Multiply(0.5)
+			scattered, newRay := rec.Scatter(r,rec)
+			if scattered {
+				newColor := newRay.Color(h, depth-1)
+				return rec.Material.MatColor().MultiplyVector(newColor)
+			}
+			return Vector{}
 		}
+
 	}
 
 	t := 0.5 * (r.Direction.Y + 1.0)

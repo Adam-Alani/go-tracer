@@ -14,7 +14,7 @@ func main() {
 
 	aspectRatio := 16.0 / 9.0
 
-	imgWidth := 400
+	imgWidth := 1920
 	imgHeight := int(float64(imgWidth)/aspectRatio)
 
 	min := image.Point{}
@@ -30,10 +30,13 @@ func main() {
 	depth := 50
 	cam := makeCamera(2.0,1.0)
 
-	sphere := Sphere{Center: Vector{0,0,-1}, Radius: 0.5}
-	floor := Sphere{Center: Vector{0,-100.5,-1},Radius: 100}
 
-	list := List{[]Hittable{sphere,floor}}
+	sphere := Sphere{Center: Vector{0,0,-1}, Radius: 0.5, Material: Lambertian{Vector{0.7,0.3,0.3}}}
+	floor := Sphere{Center: Vector{0,-100.5,-1},Radius: 100,  Material: Lambertian{Vector{0.8,0.8,0.0}}}
+	left := Sphere{Vector{-1, 0, -1}, 0.5, Metal{Vector{0.8, 0.8, 0.8},0.3}}
+	right := Sphere{Vector{1, 0, -1}, 0.5, Metal{Vector{0.8, 0.6, 0.2},1}}
+
+	list := List{[]Hittable{sphere,floor, left , right}}
 
 	f, _ := os.Create("out.ppm")
 	fmt.Fprintf(f, "P3\n%d %d\n255\n", imgWidth, imgHeight)
@@ -55,7 +58,7 @@ func main() {
 			r := math.Sqrt(pxColor.X/100)
 			g := math.Sqrt(pxColor.Y/100)
 			b := math.Sqrt(pxColor.Z/100)
-			fmt.Fprintf(f, "%d %d %d\n", int(clamp(r,0.0,0.999) * 256), int(clamp(g,0.0,0.999) * 256),int(clamp(b,0.0,0.999) * 256))
+			fmt.Fprintf(f, "%d %d %d\n", int(clamp(r,0.0,0.99) * 256), int(clamp(g,0.0,0.99) * 256),int(clamp(b,0.0,0.99) * 256))
 
 		}
 	}
@@ -73,9 +76,9 @@ func writeColor(i,j int , colorVector Vector, img *image.RGBA, samples int ) {
 	b := math.Sqrt( colorVector.Z * (1.0/ float64(samples)))
 	img.Set(j,i,
 		color.RGBA{
-		R: uint8(clamp(r,0.0,0.999) * 256),
-		G: uint8(clamp(g,0.0,0.999) * 256),
-		B: uint8(clamp(b,0.0,0.999) * 256),
+		R: uint8(clamp(r,0.0,0.99) * 256),
+		G: uint8(clamp(g,0.0,0.99) * 256),
+		B: uint8(clamp(b,0.0,0.99) * 256),
 		A: 255,
 		})
 }
