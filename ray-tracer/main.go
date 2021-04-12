@@ -25,7 +25,7 @@ func main() {
 
 	vh := 2.0
 	vw := aspectRatio * vh
-	focalLength := 1.0
+	focalLength := -1.0
 
 	origin := Vector{0,0,0}
 	horizontal := Vector{vw,0,0}
@@ -34,8 +34,10 @@ func main() {
 	lowerLeft := origin.Subtract(horizontal.Divide(2)).Subtract(vertical.Divide(2)).Add(Vector{0,0, focalLength})
 
 
+	sphere := Sphere{Center: Vector{0,0,-1}, Radius: 0.5}
+	floor := Sphere{Center: Vector{0,-100.5,-1},Radius: 100}
 
-
+	list := List{[]Hittable{sphere,floor}}
 	f, _ := os.Create("out.ppm")
 	fmt.Fprintf(f, "P3\n%d %d\n255\n", imgWidth, imgHeight)
 
@@ -49,7 +51,7 @@ func main() {
 
 
 			r := Ray{origin,lowerLeft.Add(horizontal.Multiply(u)).Add(vertical.Multiply(v)).Subtract(origin)}
-			pxColor := r.Color()
+			pxColor := r.Color(list)
 
 			writeColor(i,j,pxColor, img)
 
@@ -62,6 +64,7 @@ func main() {
 	png.Encode(out, img)
 
 }
+
 
 
 func writeColor(i,j int , colorVector Vector, img *image.RGBA ) {

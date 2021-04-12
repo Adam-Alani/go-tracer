@@ -63,6 +63,10 @@ func (v1 Vector) Length() float64  {
 	return math.Sqrt(v1.X*v1.X + v1.Y*v1.Y + v1.Z + v1.Z)
 }
 
+func (v1 Vector) LengthSquared() float64  {
+	return v1.X*v1.X + v1.Y*v1.Y + v1.Z + v1.Z
+}
+
 
 func (v1 Vector) Dot(v2 Vector) float64 {
 	return v1.X * v2.X + v1.Y * v2.Y + v1.Z * v2.Z
@@ -77,5 +81,10 @@ func (v1 Vector) Cross(v2 Vector) Vector {
 }
 
 func (v1 Vector) UnitVector() Vector {
-	return v1.Divide(v1.Length())
+	k := 1.0 / v1.Length()
+	return Vector{
+		v1.X * k,
+		v1.Y * k,
+		v1.Z * k,
+	}
 }
