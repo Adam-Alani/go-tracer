@@ -10,11 +10,12 @@ import (
 	"os"
 )
 
+
 func main() {
 
 	aspectRatio := 16.0 / 9.0
 
-	imgWidth := 1920
+	imgWidth := 400
 	imgHeight := int(float64(imgWidth)/aspectRatio)
 
 	min := image.Point{}
@@ -31,12 +32,13 @@ func main() {
 	cam := makeCamera(2.0,1.0)
 
 
-	sphere := Sphere{Center: Vector{0,0,-1}, Radius: 0.5, Material: Lambertian{Vector{0.7,0.3,0.3}}}
-	floor := Sphere{Center: Vector{0,-100.5,-1},Radius: 100,  Material: Lambertian{Vector{0.8,0.8,0.0}}}
+	sphere := Sphere{Center: Vector{0,0,-1}, Radius: 0.5, Material: Lambertian{Vector{0.4,0.4,0.4}}}
+	floor := Sphere{Center: Vector{0,-100.5,-1},Radius: 100,  Material: Lambertian{Vector{0.6,0.1,0.4}}}
 	left := Sphere{Vector{-1, 0, -1}, 0.5, Metal{Vector{0.8, 0.8, 0.8},0.3}}
-	right := Sphere{Vector{1, 0, -1}, 0.5, Metal{Vector{0.8, 0.6, 0.2},1}}
+	right := Sphere{Vector{1, 0, -1}, -0.4, Dielectric{1.5}}
+	right1 := Sphere{Vector{1, 0, -1}, 0.5, Dielectric{1.5}}
 
-	list := List{[]Hittable{sphere,floor, left , right}}
+	list := List{[]Hittable{sphere,floor, left, right, right1}}
 
 	f, _ := os.Create("out.ppm")
 	fmt.Fprintf(f, "P3\n%d %d\n255\n", imgWidth, imgHeight)
@@ -53,11 +55,11 @@ func main() {
 				pxColor = pxColor.Add(r.Color(list,depth))
 			}
 
-			writeColor(i,j,pxColor, img, samples)
+			go writeColor(i,j,pxColor, img, samples)
 
-			r := math.Sqrt(pxColor.X/100)
-			g := math.Sqrt(pxColor.Y/100)
-			b := math.Sqrt(pxColor.Z/100)
+			r := math.Sqrt(pxColor.X * (1.0/float64(samples)))
+			g := math.Sqrt(pxColor.Y * (1.0/float64(samples)))
+			b := math.Sqrt(pxColor.Z * (1.0/float64(samples)))
 			fmt.Fprintf(f, "%d %d %d\n", int(clamp(r,0.0,0.99) * 256), int(clamp(g,0.0,0.99) * 256),int(clamp(b,0.0,0.99) * 256))
 
 		}

@@ -5,6 +5,7 @@ type Camera struct {
 	VH,VW,FL float64
 }
 
+
 func makeCamera(vh,focalLength float64) Camera{
 	aspectRatio := 16.0 / 9.0
 	vw := aspectRatio * vh

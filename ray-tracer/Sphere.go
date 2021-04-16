@@ -6,8 +6,8 @@ type Sphere struct {
 	Center Vector
 	Radius float64
 	Material
-
 }
+
 
 func (s Sphere) Hit(r Ray, tMin, tMax float64) (bool,HitRecord) {
 	oc := r.Origin.Subtract(s.Center)
@@ -21,22 +21,15 @@ func (s Sphere) Hit(r Ray, tMin, tMax float64) (bool,HitRecord) {
 		return false,rec
 	}
 
-
-
 	t := (-b - math.Sqrt(delta)) / a
-	if t > tMin && t < tMax {
-		rec.P = r.At(t)
-		rec.T = t
-		rec.Normal =   r.At(t).Subtract(s.Center).UnitVector()
-		return true,rec
+	if t < tMin || tMax < t {
+		t = (-b + math.Sqrt(delta)) / a
+		if t < tMax || tMax < t {
+			return false, HitRecord{}
+		}
 	}
-
-	t = (-b + math.Sqrt(delta)) / a
-	if t > tMin && t < tMax {
-		rec.P = r.At(t)
-		rec.T = t
-		rec.Normal = r.At(t).Subtract(s.Center).UnitVector()
-		return true, rec
-	}
-	return false,HitRecord{}
+	rec.P = r.At(t)
+	rec.T = t
+	rec.Normal = r.At(t).Subtract(s.Center).Divide(s.Radius)
+	return true, rec
 }

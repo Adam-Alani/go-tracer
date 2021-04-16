@@ -15,7 +15,7 @@ func (r Ray) At(k float64) Vector {
 
 func (r Ray) Color(h Hittable, depth int) Vector {
 
-	contact, rec := h.Hit(r,0.001,math.Inf(1))
+	contact, rec := h.Hit(r,0.001, math.MaxFloat64)
 
 	if contact {
 		if depth > 0 {
