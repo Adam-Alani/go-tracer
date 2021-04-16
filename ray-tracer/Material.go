@@ -69,7 +69,7 @@ func (d Dielectric) Scatter(in Ray, hit HitRecord) (bool , Ray) {
 	if cantRefract || d.schlick(cos) > rand.Float64() {
 		direction = reflect(in.Direction, hit.Normal)
 	} else {
-		direction = refract(uDir, hit.Normal, d.I)
+		direction = refract(in.Direction, hit.Normal, d.I)
 	}
 
 	return true , Ray{hit.P, direction}
